@@ -14,12 +14,14 @@ module Ssmenv
     class_option :env_file, desc: 'Environment file to use', default: '.env.local'
 
     desc 'pull', 'Pull configuration from SSM to .env.local'
-    def pull
+    def pull(*args)
       File.open(options.env_file, 'w') do |f|
         parameters.each do |key, value|
           f.puts "#{key}=\"#{value.gsub("\n", '\n')}\""
         end
       end
+
+      exec(*args)
     end
 
     desc 'push', 'Push settings from env_File to SSM'
@@ -32,7 +34,7 @@ module Ssmenv
         resp = client.put_parameter(name: "#{path}/#{name}", value: value, type: 'SecureString', overwrite: true)
         say "Updated #{name}: v#{resp.version}"
       end
-      
+
     end
 
     no_commands do
